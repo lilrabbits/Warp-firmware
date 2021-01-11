@@ -52,3 +52,4 @@ WarpStatus	readSensorSignalBME680(WarpTypeMask signal,
 					WarpSignalReliability reliability,
 					WarpSignalNoise noise);
 void		printSensorDataBME680(bool hexModeFlag);
+void		newSensorDataBME680(uint8_t* new_temp, uint8_t* new_press, uint8_t* new_hum, uint16_t* new_gas_res, uint16_t menuI2cPullupValue);
