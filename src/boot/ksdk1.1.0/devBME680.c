@@ -522,20 +522,18 @@ newSensorDataBME680(uint8_t* new_temp, uint8_t* new_hum, uint8_t* new_press, uin
         uint16_t par_t1 = (deviceBME680CalibrationValues[34] << 8) | deviceBME680CalibrationValues[33];
         int16_t par_t2 = (deviceBME680CalibrationValues[2] << 8) | deviceBME680CalibrationValues[1];
         int8_t par_t3 = deviceBME680CalibrationValues[3];
-        int32_t var1;
-        int32_t var2;
-        int32_t var3;
-        int32_t var4;
-        int32_t var5;
-        int32_t var6;
+        int32_t var1_t;
+        int32_t var2_t;
+        int32_t var3_t;
         int32_t t_fine;
         int16_t temp_comp;
 
-        var1 = (unsignedRawAdcValue >> 3) - (par_t1 << 1);
-        var2 = (var1 * par_t2) >> 11;
-        var3 = ((((var1 >> 1) * (var1 >> 1)) >> 12) * (par_t3 << 4)) >> 14;
-        t_fine = var2 + var3;
+        var1_t = (unsignedRawAdcValue >> 3) - (par_t1 << 1);
+        var2_t = (var1_t * par_t2) >> 11;
+        var3_t = ((((var1_t >> 1) * (var1_t >> 1)) >> 12) * (par_t3 << 4)) >> 14;
+        t_fine = var2_t + var3_t;
         temp_comp = (((t_fine) * 5) + 128) >> 8;
+	temp_comp = temp_comp / 100;
 
 	if ((triggerStatus != kWarpStatusOK) || (i2cReadStatusMSB != kWarpStatusOK) || (i2cReadStatusLSB != kWarpStatusOK) || (i2cReadStatusXLSB != kWarpStatusOK))
         {
@@ -543,7 +541,7 @@ newSensorDataBME680(uint8_t* new_temp, uint8_t* new_hum, uint8_t* new_press, uin
         }
         else
         {
-   		*new_temp = temp_comp/100;
+   		*new_temp = (uint8_t) (temp_comp & 0x000000FF);
         }
 	
 	/*
@@ -562,40 +560,44 @@ newSensorDataBME680(uint8_t* new_temp, uint8_t* new_hum, uint8_t* new_press, uin
                         ((readSensorRegisterValueLSB & 0xFF)  << 4)  |
                         ((readSensorRegisterValueXLSB & 0xF0) >> 4);
 
-        uint16_t par_p1 = (deviceBME680CalibrationValues[7] << 8) | deviceBME680CalibrationValues[6];
-        int16_t par_p2 = (deviceBME680CalibrationValues[9] << 8) | deviceBME680CalibrationValues[8];
-        int8_t par_p3 = deviceBME680CalibrationValues[10];
-        int16_t par_p4 = (deviceBME680CalibrationValues[13] << 8) | deviceBME680CalibrationValues[12];
-        int16_t par_p5 = (deviceBME680CalibrationValues[15] << 8) | deviceBME680CalibrationValues[14];
-        int8_t par_p6 = deviceBME680CalibrationValues[17];
-        int8_t par_p7 = deviceBME680CalibrationValues[16];
-        int16_t par_p8 = (deviceBME680CalibrationValues[21] << 8) | deviceBME680CalibrationValues[20];
-        int16_t par_p9 = (deviceBME680CalibrationValues[23] << 8) | deviceBME680CalibrationValues[22];
-        uint8_t par_p10 = deviceBME680CalibrationValues[24];
-        int32_t press_comp;
+        uint16_t par_p1 = (deviceBME680CalibrationValues[6] << 8) | deviceBME680CalibrationValues[5];
+        int16_t par_p2 = (deviceBME680CalibrationValues[8] << 8) | deviceBME680CalibrationValues[7];
+        int8_t par_p3 = deviceBME680CalibrationValues[9];
+        int16_t par_p4 = (deviceBME680CalibrationValues[12] << 8) | deviceBME680CalibrationValues[11];
+        int16_t par_p5 = (deviceBME680CalibrationValues[14] << 8) | deviceBME680CalibrationValues[13];
+        int8_t par_p6 = deviceBME680CalibrationValues[16];
+        int8_t par_p7 = deviceBME680CalibrationValues[15];
+        int16_t par_p8 = (deviceBME680CalibrationValues[20] << 8) | deviceBME680CalibrationValues[19];
+        int16_t par_p9 = (deviceBME680CalibrationValues[22] << 8) | deviceBME680CalibrationValues[21];
+        uint8_t par_p10 = deviceBME680CalibrationValues[23];
+       	int32_t var1_p;
+        int32_t var2_p;
+        int32_t var3_p;
+       	int32_t press_comp;
         
-        var1 = (t_fine >> 1) - 64000;
-        var2 = ((((var1 >> 2) * (var1 >> 2)) >> 11) * par_p6) >> 2;
-        var2 = var2 + ((var1 * par_p5) << 1);
-        var2 = (var2 >> 2) + (par_p4 << 16);
-        var1 = (((((var1 >> 2) * (var1 >> 2)) >> 13) * (par_p3 << 5)) >> 3) + ((par_p2 * var1) >> 1);
-        var1 = var1 >> 18;
-        var1 = ((32768 + var1) * par_p1) >> 15;
+        var1_p = (t_fine >> 1) - 64000;
+        var2_p = ((((var1_p >> 2) * (var1_p >> 2)) >> 11) * par_p6) >> 2;
+        var2_p = var2_p + ((var1_p * par_p5) << 1);
+        var2_p = (var2_p >> 2) + (par_p4 << 16);
+        var1_p = (((((var1_p >> 2) * (var1_p >> 2)) >> 13) * (par_p3 << 5)) >> 3) + ((par_p2 * var1_p) >> 1);
+        var1_p = var1_p >> 18;
+        var1_p = ((32768 + var1_p) * par_p1) >> 15;
         press_comp = 1048576 - unsignedRawAdcValue;
-        press_comp = ((press_comp - (var2 >> 12)) * 3125);
+        press_comp = ((press_comp - (var2_p >> 12)) * 3125);
 	
 	if (press_comp >= (1 << 30))
  	{
-		press_comp = ((press_comp / var1) << 1);
+		press_comp = ((press_comp / var1_p) << 1);
  	}
 	else
 	{
-		press_comp = ((press_comp << 1) / var1);
+		press_comp = ((press_comp << 1) / var1_p);
 	}
-	var1 = (par_p9 * (((press_comp >> 3) * (press_comp >> 3)) >> 13)) >> 12;
-	var2 = ((press_comp >> 2) * par_p8) >> 13;
-	var3 = ((press_comp >> 8) * (press_comp >> 8) * (press_comp >> 8) * par_p10) >> 17;
-	press_comp = (press_comp) + ((var1 + var2 + var3 + (par_p7 << 7)) >> 4);
+	var1_p = (par_p9 * (((press_comp >> 3) * (press_comp >> 3)) >> 13)) >> 12;
+	var2_p = ((press_comp >> 2) * par_p8) >> 13;
+	var3_p = ((press_comp >> 8) * (press_comp >> 8) * (press_comp >> 8) * par_p10) >> 17;
+	press_comp = (press_comp) + ((var1_p + var2_p + var3_p + (par_p7 << 7)) >> 4);
+	press_comp = press_comp / 100;
 
         if ((triggerStatus != kWarpStatusOK) || (i2cReadStatusMSB != kWarpStatusOK) || (i2cReadStatusLSB != kWarpStatusOK) || (i2cReadStatusXLSB != kWarpStatusOK))
         {
@@ -604,7 +606,7 @@ newSensorDataBME680(uint8_t* new_temp, uint8_t* new_hum, uint8_t* new_press, uin
 	
         else
         {
-                *new_press = press_comp;
+                *new_press = (uint8_t) (press_comp & 0x000000FF);
         }
 
 	/*
@@ -623,6 +625,12 @@ newSensorDataBME680(uint8_t* new_temp, uint8_t* new_hum, uint8_t* new_press, uin
         int8_t par_h5 = deviceBME680CalibrationValues[30];
         uint8_t par_h6 = deviceBME680CalibrationValues[31];
         int8_t par_h7 = deviceBME680CalibrationValues[32];
+	int32_t var1;
+        int32_t var2;
+        int32_t var3;
+        int32_t var4;
+        int32_t var5;
+        int32_t var6;
         int32_t hum_comp;
 
         var1 = unsignedRawAdcValue - (par_h1 << 4) - (((temp_comp * par_h3) / 100) >> 1);
@@ -643,13 +651,15 @@ newSensorDataBME680(uint8_t* new_temp, uint8_t* new_hum, uint8_t* new_press, uin
                 hum_comp = 0;
         }
 
+	hum_comp = hum_comp / 1000;
+
 	if ((triggerStatus != kWarpStatusOK) || (i2cReadStatusMSB != kWarpStatusOK) || (i2cReadStatusLSB != kWarpStatusOK))
         {
                 *new_hum = 0;
         }
         else
         {
-        	*new_hum = hum_comp/1000;
+        	*new_hum = (uint8_t) (hum_comp & 0x000000FF);
         }
 
 	/*
@@ -664,6 +674,11 @@ newSensorDataBME680(uint8_t* new_temp, uint8_t* new_hum, uint8_t* new_press, uin
         uint8_t res_heat_x;
         int32_t res_heat_x100;
         int32_t target_temp;
+	int32_t var1_g;
+        int32_t var2_g;
+        int32_t var3_g;
+        int32_t var4_g;
+        int32_t var5_g;
 
         readSensorRegisterBME680(0x00, 1);
         res_heat_val = deviceBME680State.i2cBuffer[0];
@@ -677,12 +692,12 @@ newSensorDataBME680(uint8_t* new_temp, uint8_t* new_hum, uint8_t* new_press, uin
         par_g3 = deviceBME680CalibrationValues[38];
         target_temp = 320;
 
-        var1 = ((25 * par_g3) / 10) << 8;
-        var2 = (par_g1 + 784) * (((((par_g2 + 154009) * target_temp * 5) / 100) + 3276800) / 10);
-        var3 = var1 + (var2 >> 1);
-        var4 = (var3 / (res_heat_range + 4));
-        var5 = (131 * res_heat_val) + 65536;
-        res_heat_x100 = ((var4 / var5) - 250) * 34;
+        var1_g = ((25 * par_g3) / 10) << 8;
+        var2_g = (par_g1 + 784) * (((((par_g2 + 154009) * target_temp * 5) / 100) + 3276800) / 10);
+        var3_g = var1_g + (var2_g >> 1);
+        var4_g = (var3_g / (res_heat_range + 4));
+        var5_g = (131 * res_heat_val) + 65536;
+        res_heat_x100 = ((var4_g / var5_g) - 250) * 34;
         res_heat_x = (res_heat_x100 + 50) / 100;
 
         writeSensorRegisterBME680(0x5A, res_heat_x, menuI2cPullupValue);

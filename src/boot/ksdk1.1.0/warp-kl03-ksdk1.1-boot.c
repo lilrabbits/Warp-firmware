@@ -1413,6 +1413,7 @@ main(void)
 			 */
 			case 'a':
 			{
+				/*
 				SEGGER_RTT_WriteString(0, "\r\tSelect:\n");
 #ifdef WARP_BUILD_ENABLE_DEVADXL362
 				SEGGER_RTT_WriteString(0, "\r\t- '1' ADXL362			(0x00--0x2D): 1.6V -- 3.5V\n");
@@ -1473,14 +1474,14 @@ main(void)
 				SEGGER_RTT_WriteString(0, "\r\t- 'a' L3GD20H			(0x0F--0x39): 2.2V -- 3.6V (compiled out) \n");
 #endif
 				OSA_TimeDelay(gWarpMenuPrintDelayMilliseconds);
-
+*/
 #ifdef WARP_BUILD_ENABLE_DEVBME680
 				SEGGER_RTT_WriteString(0, "\r\t- 'b' BME680			(0xAA--0xF8): 1.6V -- 3.6V\n");
 				#else
 				SEGGER_RTT_WriteString(0, "\r\t- 'b' BME680			(0xAA--0xF8): 1.6V -- 3.6V (compiled out) \n");
 #endif
 				OSA_TimeDelay(gWarpMenuPrintDelayMilliseconds);
-
+/*
 #ifdef WARP_BUILD_ENABLE_DEVTCS34725
 				SEGGER_RTT_WriteString(0, "\r\t- 'd' TCS34725			(0x00--0x1D): 2.7V -- 3.3V\n");
 				#else
@@ -1529,7 +1530,7 @@ main(void)
 				SEGGER_RTT_WriteString(0, "\r\t- 'k' AS7263			(0x00--0x2B): 2.7V -- 3.6V (compiled out) \n");
 #endif
 				OSA_TimeDelay(gWarpMenuPrintDelayMilliseconds);
-
+*/
 				SEGGER_RTT_WriteString(0, "\r\tEnter selection> ");
 				OSA_TimeDelay(gWarpMenuPrintDelayMilliseconds);
 
@@ -1537,7 +1538,7 @@ main(void)
 
 				switch(key)
 				{
-#ifdef WARP_BUILD_ENABLE_DEVADXL362
+/* #ifdef WARP_BUILD_ENABLE_DEVADXL362
 					case '1':
 					{
 						menuTargetSensor = kWarpSensorADXL362;
@@ -1617,6 +1618,7 @@ main(void)
 						break;
 					}
 #endif
+					*/
 #ifdef WARP_BUILD_ENABLE_DEVBME680
 					case 'b':
 					{
@@ -1625,6 +1627,7 @@ main(void)
 						break;
 					}
 #endif
+					/*
 #ifdef WARP_BUILD_ENABLE_DEVTCS34725
 					case 'd':
 					{
@@ -1681,6 +1684,7 @@ main(void)
 						break;
 					}
 #endif
+*/
 
 					default:
 					{
@@ -2473,7 +2477,7 @@ printAllSensors(bool printHeadersAndCalibration, bool hexModeFlag, int menuDelay
 	uint32_t	readingCount = 0;
 	uint32_t	numberOfConfigErrors = 0;
 
-
+	
 	#ifdef WARP_BUILD_ENABLE_DEVAMG8834
 	numberOfConfigErrors += configureSensorAMG8834(	0x3F,/* Initial reset */
 					0x01,/* Frame rate 1 FPS */
