@@ -1263,12 +1263,12 @@ main(void)
 	           {
 	                   devSSD1331DrawTemp(new_temp);
 	           }
-
+/*
 	           if (old_press != new_press)
 	           {
 	                   devSSD1331DrawPress(new_press);
 	           }
-
+*/
 	           if (old_hum != new_hum)
 	           {
 	                   devSSD1331DrawHum(new_hum);
@@ -2430,7 +2430,8 @@ main(void)
 			/*
 			 *	Ignore naked returns.
 			 */
-                        case '0':
+                       /*
+		       	case '0':
                         {
 				enableI2Cpins(menuI2cPullupValue);
                 		SEGGER_RTT_printf(0, "\n Current/uA, Bus Voltage/mV"); 
@@ -2447,7 +2448,7 @@ main(void)
                                 }
                                 break;
                         }
-
+*/
 			case '\n':
 			{
 				SEGGER_RTT_WriteString(0, "\r\tPayloads make rockets more than just fireworks.");
