@@ -255,8 +255,8 @@ static void FontSizeConvert()
     }
 }
 
-int
-devSSD1331init(void)
+void
+devSSD1331init(int new_temp, int new_hum)
 {
 	/*
 	 *	Override Warp firmware's use of these pins.
@@ -373,24 +373,63 @@ devSSD1331init(void)
         writeString("degC");
 
 	locate(17,10);
-        int value = 0;
-        uint16_t value2 = 1;
-        display(17,10,value, value2);
-
-	locate(3,30);
+//int value3 = 0;
+        uint16_t value1 = 1;
+        display(17,10,new_temp, value1);
+		
+	locate(3,40);
         writeString("H:");
 
-        locate(33,30);
+        locate(33,40);
         writeString("%RH");
 
-	locate(17,30);
-	int value3 = 0;
+	locate(17,40);
+//	int value3 = 0;
 	uint16_t value4 = 1;
-	display(17,30,value3, value4);
+	display(17,40,new_hum, value4);
 
-	return 0;
+	if((new_temp > 20) & (new_temp < 25) & (new_hum > 40) & (new_hum < 60)){
+		devSSD1331DrawSmiley();
+	}
+	else{
+	locate(80,25);
+        writeString("!");
+	}
 }
 
+void drawRectLine(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, uint8_t C, uint8_t B, uint8_t A, bool rect){
+	// Draw a rectangle or line from (x0, y0) to (x1, y1) of colour (C, B, A)
+
+        if (rect == 1){
+		writeCommand(0x22); // Enter 'draw rectangle' mode
+	} else {
+		writeCommand(0x21); // Enter 'draw line' mode
+	}
+        writeCommand(x0);      // Start column address
+        writeCommand(y0);      // Start row address
+        writeCommand(x1);      // End column address
+        writeCommand(y1);      // End row address
+	writeCommand(C);       // Set outline colour C
+        writeCommand(B);       // Set outline colour B
+        writeCommand(A);       // Set outline colour A
+        writeCommand(C);       // Set fill colour C
+        writeCommand(B);       // Set fill colour B
+        writeCommand(A);       // Set fill colour A
+}
+
+void	devSSD1331DrawSmiley(){
+        drawRectLine(0x4B, 0x1D, 0x4C, 0x20, 0xFF, 0xFF, 0xFF, 1);
+        drawRectLine(0x53, 0x1D, 0x54, 0x20, 0xFF, 0xFF, 0xFF, 1);
+        drawRectLine(0x4E, 0x2A, 0x51, 0x2B, 0xFF, 0xFF, 0xFF, 1);
+        drawRectLine(0x4C, 0x29, 0x4D, 0x2A, 0xFF, 0xFF, 0xFF, 1);
+        drawRectLine(0x52, 0x29, 0x53, 0x2a, 0xFF, 0xFF, 0xFF, 1);
+        drawRectLine(0x4B, 0x28, 0x4C, 0x29, 0xFF, 0xFF, 0xFF, 1);
+        drawRectLine(0x53, 0x28, 0x54, 0x29, 0xFF, 0xFF, 0xFF, 1);
+        drawRectLine(0x4A, 0x27, 0x4B, 0x28, 0xFF, 0xFF, 0xFF, 1);
+        drawRectLine(0x54, 0x27, 0x55, 0x28, 0xFF, 0xFF, 0xFF, 1);
+        drawRectLine(0x49, 0x26, 0x4A, 0x26, 0xFF, 0xFF, 0xFF, 1);
+        drawRectLine(0x55, 0x26, 0x56, 0x26, 0xFF, 0xFF, 0xFF, 1);
+}
 	/*
 	 * https://os.mbed.com/users/star297/code/ssd1331/docs/tip/ssd1331_8h_source.html
 	*/

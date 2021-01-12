@@ -19,8 +19,8 @@
 
 typedef enum
 {
-//	kSSD1331CommandDRAWLINE		= 0x21,
-//	kSSD1331CommandDRAWRECT		= 0x22,
+	kSSD1331CommandDRAWLINE		= 0x21,
+	kSSD1331CommandDRAWRECT		= 0x22,
 	kSSD1331CommandCLEAR		= 0x25,
 	kSSD1331CommandFILL		= 0x26,
 	kSSD1331CommandSETCOLUMN	= 0x15,
@@ -59,8 +59,8 @@ uint8_t char_x;
 uint8_t char_y;
 uint16_t displayedNumber = 0;
 
-int	devSSD1331init(void);
-
+void devSSD1331init(int new_temp, int new_hum);
+void	devSSD1331DrawSmiley();
 void writeChar(int value);
 void pixel(uint8_t x,uint8_t y,char colour);
 void locate(uint8_t column, uint8_t row);

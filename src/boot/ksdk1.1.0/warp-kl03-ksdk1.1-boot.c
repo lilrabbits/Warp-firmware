@@ -1225,9 +1225,6 @@ main(void)
 	 *	Notreached
 	 */
 #endif
-	  devSSD1331init();
-                                
-	   	SEGGER_RTT_WriteString(0, "\r\n\tEnabling I2C pins...\n");
 	           enableI2Cpins(menuI2cPullupValue);
 	           OSA_TimeDelay(gWarpMenuPrintDelayMilliseconds);
 
@@ -1250,13 +1247,18 @@ main(void)
 	   //        uint8_t old_press = 0;
 	           uint8_t old_hum = 0;
 	          uint16_t old_gas_res = 0;
-
+			int temp_int;
+			int hum_int;
 
 	           while (1)
-	           {
+	           
+		   {
 			   enableI2Cpins(menuI2cPullupValue);
 	                   newSensorDataBME680(&new_temp, &new_hum, &new_gas_res, menuI2cPullupValue);
-	  //                 newPressSensorDataBME680(&new_press, menuI2cPullupValue);
+	  		   temp_int=(int)new_temp;
+                           hum_int=(int)new_hum;
+			   devSSD1331init(temp_int, hum_int);
+	  //               newPressSensorDataBME680(&new_press, menuI2cPullupValue);
 			   SEGGER_RTT_printf(0, " \n T: %d degC, H: %d %%rH", new_temp,  new_hum);
 	             //    printSensorDataBME680(true, menuI2cPullupValue);
 	
