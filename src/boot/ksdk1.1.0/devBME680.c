@@ -190,7 +190,7 @@ configureSensorBME680(uint8_t payloadCtrl_Hum, uint8_t payloadCtrl_Meas, uint8_t
 
 
 void 
-newSensorDataBME680(uint8_t* new_temp, uint8_t* new_hum, uint8_t* new_press, uint16_t* new_gas_res, uint16_t menuI2cPullupValue)
+newSensorDataBME680(uint8_t* new_temp, uint8_t* new_hum, uint16_t* new_gas_res, uint16_t menuI2cPullupValue)
 {       
        	uint16_t        readSensorRegisterValueLSB;
         uint16_t        readSensorRegisterValueMSB;
@@ -243,7 +243,7 @@ newSensorDataBME680(uint8_t* new_temp, uint8_t* new_hum, uint8_t* new_press, uin
 	
 	/*
          *      Then, trigger a measurement of pressure
-         */
+         *
 
         i2cReadStatusMSB = readSensorRegisterBME680(kWarpSensorOutputRegisterBME680press_msb, 1);
         readSensorRegisterValueMSB = deviceBME680State.i2cBuffer[0];
@@ -305,6 +305,7 @@ newSensorDataBME680(uint8_t* new_temp, uint8_t* new_hum, uint8_t* new_press, uin
         {
                 *new_press = (uint8_t) (press_comp & 0x000000FF);
         }
+	*/
 
 	/*
          *      Next, trigger a measurement of humidity
@@ -432,13 +433,11 @@ newSensorDataBME680(uint8_t* new_temp, uint8_t* new_hum, uint8_t* new_press, uin
         int64_t var3_comp;
         uint32_t gas_res_comp;
 
-        /**Look up table 1 for the possible gas range values */
         uint32_t lookupTable1[16] = { UINT32_C(2147483647), UINT32_C(2147483647), UINT32_C(2147483647), UINT32_C(2147483647),
                 UINT32_C(2147483647), UINT32_C(2126008810), UINT32_C(2147483647), UINT32_C(2130303777),
                 UINT32_C(2147483647), UINT32_C(2147483647), UINT32_C(2143188679), UINT32_C(2136746228),
                 UINT32_C(2147483647), UINT32_C(2126008810), UINT32_C(2147483647), UINT32_C(2147483647) };
 
-        /**Look up table 2 for the possible gas range values */
         uint32_t lookupTable2[16] = { UINT32_C(4096000000), UINT32_C(2048000000), UINT32_C(1024000000), UINT32_C(512000000),
                 UINT32_C(255744255), UINT32_C(127110228), UINT32_C(64000000), UINT32_C(32258064), UINT32_C(16016016),
                 UINT32_C(8000000), UINT32_C(4000000), UINT32_C(2000000), UINT32_C(1000000), UINT32_C(500000),
@@ -458,4 +457,6 @@ newSensorDataBME680(uint8_t* new_temp, uint8_t* new_hum, uint8_t* new_press, uin
         {
                 *new_gas_res = gas_res_comp;
         }
+	
 }
+

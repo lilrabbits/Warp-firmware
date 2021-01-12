@@ -51,4 +51,6 @@ WarpStatus	readSensorSignalBME680(WarpTypeMask signal,
 					WarpSignalAccuracy accuracy,
 					WarpSignalReliability reliability,
 					WarpSignalNoise noise);
-void		newSensorDataBME680(uint8_t* new_temp, uint8_t* new_press, uint8_t* new_hum, uint16_t* new_gas_res, uint16_t menuI2cPullupValue);
+
+//void		newPressSensorDataBME680(uint8_t* new_press, uint16_t menuI2cPullupValue);
+void		newSensorDataBME680(uint8_t* new_temp, uint8_t* new_hum, uint16_t* new_gas_res, uint16_t menuI2cPullupValue);

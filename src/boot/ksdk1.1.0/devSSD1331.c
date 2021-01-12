@@ -155,83 +155,105 @@ writeCommand(uint8_t commandByte)
 
 	return status;
 }
-/*
- *
-*/
-void drawLine(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, uint8_t C, uint8_t B, uint8_t A)
-        {
-        writeCommand(0x21);     // Draw Line
-        writeCommand(x0);       // Column address of start
-        writeCommand(y0);       // Row address of start
-        writeCommand(x1);       // Column address of end
-        writeCommand(y1);       // Row address of end
-        writeCommand(C);        // Colour C of the line
-        writeCommand(B);        // Colour B of the line
-        writeCommand(A);        // Colour A of the line
-        }
 
-void drawRect(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, uint8_t C, uint8_t B, uint8_t A)
-	{
-	writeCommand(0x22); 	// Draw Rectangle
-        writeCommand(x0);      	// Column address of start
-        writeCommand(y0);      	// Row address of start
-        writeCommand(x1);      	// Column address of end
-        writeCommand(y1);      	// Row address of end
-	writeCommand(C);       	// Colour C of the line
-        writeCommand(B);       	// Colour B of the line
-        writeCommand(A);       	// Colour A of the line
-        writeCommand(C);       	// Colour C of the fill area
-        writeCommand(B);       	// Colour B of the fill area
-        writeCommand(A);       	// Colour A of the fill area
-	}	
+static int
+writeCommandMulti(uint8_t *commandByte, uint8_t count)
+{
+	spi_status_t status;
 
-void drawDigit(uint8_t x0, uint8_t y0, uint8_t number, uint8_t C, uint8_t B, uint8_t A)
-	{
-	drawRect(x0, y0, (x0+9), (y0+21), C, B, A);
-	switch(number)
-	{
-		case 0:
-			drawRect(x0+2, y0+2, x0+7, y0+19, 0x00, 0x00, 0x00);
-			break;
-		case 1:
-			drawRect(x0, y0, x0+7, y0+21, 0x00, 0x00, 0x00);
-			break;
-		case 2: 
-			drawRect(x0, y0+2, x0+7, y0+9, 0x00, 0x00, 0x00);
-			drawRect(x0+2, y0+12, x0+9, y0+19, 0x00, 0x00, 0x00);
-			break;
-		case 3:
-                        drawRect(x0, y0+2, x0+7, y0+9, 0x00, 0x00, 0x00);
-			drawRect(x0, y0+12, x0+7, y0+19, 0x00, 0x00, 0x00);
-			break;
-		case 4:
-			drawRect(x0+2, y0, x0+7, y0+9, 0x00, 0x00, 0x00);
-			drawRect(x0, y0+12, x0+7, y0+21, 0x00, 0x00, 0x00);
-			break;
-		case 5:
-			drawRect(x0+2, y0+2, x0+9, y0+9, 0x00, 0x00, 0x00);
-			drawRect(x0, y0+12, x0+7, y0+19, 0x00, 0x00, 0x00);
-			break;
-		case 6:
-			drawRect(x0+2, y0+2, x0+9, y0+9, 0x00, 0x00, 0x00);
-			drawRect(x0+2, y0+12, x0+7, y0+19, 0x00, 0x00, 0x00);
-			break;
-		case 7: 
-			drawRect(x0, y0+2, x0+7, y0+21, 0x00, 0x00, 0x00);
-			break;
-		case 8:
-			drawRect(x0+2, y0+2, x0+7, y0+9, 0x00, 0x00, 0x00);
-			drawRect(x0+2, y0+12, x0+7, y0+19, 0x00, 0x00, 0x00);
-			break;
-		case 9:
-			drawRect(x0+2, y0+2, x0+7, y0+9, 0x00, 0x00, 0x00);
-			drawRect(x0, y0+12, x0+7, y0+19, 0x00, 0x00, 0x00);
-			break;	
-		default:
-			break;
+	/*
+	 *	Drive /CS low.
+	 *
+	 *	Make sure there is a high-to-low transition by first driving high, delay, then drive low.
+	 */
+	GPIO_DRV_SetPinOutput(kSSD1331PinCSn);
+	OSA_TimeDelay(10);
+	GPIO_DRV_ClearPinOutput(kSSD1331PinCSn);
+
+	/*
+	 *	Drive DC low (command).
+	 */
+	GPIO_DRV_ClearPinOutput(kSSD1331PinDC);
+	for(int i=0; i<count; i++) {
+		payloadBytes[0] = commandByte[i];
+		status = SPI_DRV_MasterTransferBlocking(0	/* master instance */,
+						NULL		/* spi_master_user_config_t */,
+						(const uint8_t * restrict)&payloadBytes[0],
+						(uint8_t * restrict)&inBuffer[0],
+						1		/* transfer size */,
+						100		/* timeout in microseconds (unlike I2C which is ms) */);
 	}
+	/*
+	 *	Drive /CS high
+	 */
+	GPIO_DRV_SetPinOutput(kSSD1331PinCSn);
+
+	return status;
 }
 
+static int
+writeData(uint16_t commandByte)
+{
+	spi_status_t status;
+
+	/*
+	 *	Drive /CS low.
+	 *
+	 *	Make sure there is a high-to-low transition by first driving high, delay, then drive low.
+	 */
+	GPIO_DRV_SetPinOutput(kSSD1331PinDC);
+	GPIO_DRV_SetPinOutput(kSSD1331PinCSn);
+	OSA_TimeDelay(10);
+	GPIO_DRV_ClearPinOutput(kSSD1331PinCSn);
+	payloadBytes[0] = (commandByte >> 8);
+	status = SPI_DRV_MasterTransferBlocking(0	/* master instance */,
+					NULL		/* spi_master_user_config_t */,
+					(const uint8_t * restrict)&payloadBytes[0],
+					(uint8_t * restrict)&inBuffer[0],
+					1		/* transfer size */,
+					1000		/* timeout in microseconds (unlike I2C which is ms) */);
+
+	payloadBytes[0] = (commandByte);
+	status = SPI_DRV_MasterTransferBlocking(0	/* master instance */,
+					NULL		/* spi_master_user_config_t */,
+					(const uint8_t * restrict)&payloadBytes[0],
+					(uint8_t * restrict)&inBuffer[0],
+					1		/* transfer size */,
+					1000		/* timeout in microseconds (unlike I2C which is ms) */);
+	/*
+	 *	Drive /CS high
+	 */
+	GPIO_DRV_SetPinOutput(kSSD1331PinCSn);
+
+	return status;
+}
+
+static void FontSizeConvert()
+{
+    switch( chr_size ) {
+        case WIDE:
+            lpx=2;
+            lpy=1;
+            break;
+        case HIGH:
+            lpx=1;
+            lpy=2;
+            break;
+        case WH  :
+            lpx=2;
+            lpy=2;
+            break;
+        case WHx36:
+            lpx=6;
+            lpy=6;
+            break;
+        case NORMAL:
+        default:
+            lpx=1;
+            lpy=1;
+            break;
+    }
+}
 
 int
 devSSD1331init(void)
@@ -323,10 +345,10 @@ devSSD1331init(void)
 	writeCommand(0x00);
 	writeCommand(0x5F);
 	writeCommand(0x3F);
-//	SEGGER_RTT_WriteString(0, "\r\n\tDone with screen clear...\n");
+	SEGGER_RTT_WriteString(0, "\r\n\tDone with screen clear...\n");
 
 	
-
+/*
 	writeCommand(0x22);    //draw rectangle
 	writeCommand(0x00);    //column start address
 	writeCommand(0x00);    //row start address
@@ -338,70 +360,211 @@ devSSD1331init(void)
 	writeCommand(0x00);    //color c of the fill area
 	writeCommand(0xFF);    //color b of the fill area
 	writeCommand(0x00);    //color a of the fill area
-	
+*/	
 	
 //	SEGGER_RTT_WriteString(0, "\r\n\tDone with draw rectangle...\n");
 
-	drawRect(0x1C, 0x02, 0x21, 0x07, 0x3F, 0x3F, 0x3F); // Temp degree block
-	drawRect(0x1E, 0x04, 0x1F, 0x05, 0x00, 0x00, 0x00); // Temp degree cutout
-	drawRect(0x22, 0x0B, 0x29, 0x17, 0x3F, 0x3F, 0x3F); // Temp celsius block
-	drawRect(0x24, 0x0D, 0x29, 0x15, 0x00, 0x00, 0x00); // Temp celsius cutout
-	drawLine(0x53, 0x16, 0x59, 0x08, 0x3F, 0x3F, 0x3F); // Hum % slash
-	drawRect(0x50, 0x07, 0x55, 0x0C, 0x3F, 0x3F, 0x3F); // Hum % upper block
-	drawRect(0x52, 0x09, 0x53, 0x0A, 0x00, 0x00, 0x00); // Hum % upper cutout
-	drawRect(0x58, 0x12, 0x5D, 0x17, 0x3F, 0x3F, 0x3F); // Hum % lower block
-	drawRect(0x5A, 0x14, 0x5B, 0x15, 0x00, 0x00, 0x00); // Hum % lower cutout
-	drawRect(0x06, 0x1B, 0x59, 0x26, 0x3F, 0x3F, 0x3F); // IAQ block
-	drawRect(0x08, 0x1D, 0x57, 0x24, 0x00, 0x00, 0x00); // IAQ cutout	
-
-/*
-	chr_size = NORMAL;
+	chr_size = HIGH;
 	FontSizeConvert();
 	locate(3,10);
 	writeString("T:");
+	
+	locate(33,10);
+        writeString("degC");
 
-	locate(3,20);
-	int value = 0;
-	uint16_t value2 = 1;
-	display(value, value2);
-*/
+	locate(17,10);
+        int value = 0;
+        uint16_t value2 = 1;
+        display(17,10,value, value2);
+
+	locate(3,30);
+        writeString("H:");
+
+        locate(33,30);
+        writeString("%RH");
+
+	locate(17,30);
+	int value3 = 0;
+	uint16_t value4 = 1;
+	display(17,30,value3, value4);
+
 	return 0;
 }
 
-void    devSSD1331DrawTemp(uint8_t temp)
+	/*
+	 * https://os.mbed.com/users/star297/code/ssd1331/docs/tip/ssd1331_8h_source.html
+	*/
+void writeChar(int value)
 {
-	uint8_t digit1;
-	uint8_t digit0;
-	digit1 = (temp / 10) % 10;
-	digit0 = temp % 10;
-	drawDigit(0x02, 0x02, digit1, 0x00, 0x00, 0xFF);
-       	drawDigit(0x10, 0x02, digit0, 0x00, 0x00, 0xFF);
+	uint8_t chMode = 0;
+	if(value == '\n') {
+		char_x = 0;
+		char_y = char_y + Y_height;
+	}
+	if ((value < 31) || (value > 127)) return;   // test char range
+	if (char_x + X_width > width) {
+		char_x = 0;
+		char_y = char_y + Y_height;
+		if (char_y >= height - Y_height) {
+			char_y = 0;
+		}
+	}
+	int i,j,w,k,l,xw;
+	unsigned char Temp=0;
+	j = 0; i = 0;
+	w = X_width;
+	xw = X_width;
+
+	for(i=0; i<xw; i++) {
+		for ( l=0; l<lpx; l++) {
+			Temp = alphabet[value-32][i];
+			for(j=Y_height-1; j>=0; j--) {
+				for (k=0; k<lpy; k++) {
+					chMode = Temp & 0x80? 1 : 0;
+					pixel(char_x+(i*lpx)+l, char_y+(((j+1)*lpy)-1)-k,chMode);
+				}
+				Temp = Temp << 1;
+			}
+		}
+	}
+	char_x += (w*lpx);
 }
 
-void    devSSD1331DrawPress(uint8_t press)
+void locate(uint8_t column, uint8_t row)
 {
-        uint8_t digit1;
-        uint8_t digit0;
-        digit1 = (press / 10) % 10;
-        digit0 = press % 10;
-        drawDigit(0x02, 0x02, digit1, 0x00, 0x00, 0xFF);
-        drawDigit(0x10, 0x02, digit0, 0x00, 0x00, 0xFF);
+    char_x  = column;
+    char_y = row;
 }
 
-void    devSSD1331DrawHum(uint8_t hum)
+/*
+ * https://os.mbed.com/users/star297/code/ssd1331/docs/tip/ssd1331_8h_source.html
+*/
+void pixel(uint8_t x,uint8_t y, char colour)
 {
-        uint8_t digit1;
-	uint8_t digit0;
-	digit1 = (hum / 10) % 10;
-        digit0 = hum % 10;
-        drawDigit(0x36, 0x02, digit1, 0x00, 0x00, 0xFF);
-        drawDigit(0x44, 0x02, digit0, 0x00, 0x00, 0xFF);
+	if (colour)
+	{
+		unsigned char cmd[7]= {kSSD1331CommandSETCOLUMN,0x00,0x00,kSSD1331CommandSETROW,0x00,0x00};
+
+		if ((x>width)||(y>height)) return ;
+
+		cmd[1] = x;
+		cmd[2] = x;
+		cmd[4] = y;
+		cmd[5] = y;
+		writeCommandMulti(cmd,6);
+
+		uint16_t white = 0xffff;
+
+		writeData(white);
+	}
+	else
+		return;
 }
 
-void	devSSD1331DrawIAQ(uint16_t gas_res){
-	uint8_t norm;
-	norm = (gas_res * 80) / 500;
-	drawRect(0x08, 0x1D, 0x57, 0x24, 0x00, 0x00, 0x00);
-	drawRect(0x08, 0x1D, norm+8, 0x24, 0x00, 0x00, 0xFF);
+/*https://electropeak.com/learn/the-beginners-guide-to-display-text-image-animation-on-oled-display-by-arduino/
+*/
+void writeString(const char *pString)
+{
+	// int lpx,lpy;
+	// FontSizeConvert(&lpx, &lpy);
+    while (*pString != '\0') {       
+		int charAscii = (int)*pString;
+        writeChar(charAscii);
+        pString++;
+    }
 }
 
+void writeInt(int* pString, int size)
+{
+    for (int i=0; i<size;i++)
+	{
+		int charAscii = pString[i]+48;
+        writeChar(charAscii);
+    }
+}
+
+int16_t getCurrentDisplay()
+{
+	return displayedNumber;
+}
+
+void display(int x, int y, uint16_t val, uint16_t prevVal)
+{
+	if (val != prevVal)
+	{
+		unsigned int digitsCurrent=countDigits(val);
+		unsigned int digitsOld=countDigits(prevVal);
+		if (digitsCurrent != digitsOld) // If the length of the numbers are different, rewrite the whole string
+		{
+			int splitCurrent1[6];
+			splitInt(splitCurrent1,val);
+			locate(x,y);
+			clearScreen(char_x, y ,char_x+(X_width*lpx),y+Y_height*lpy);
+			writeInt(splitCurrent1,digitsCurrent);
+		}
+		else
+		{
+			int splitCurrent[6];
+			int splitPrev[6];
+			splitInt(splitCurrent, val);
+			splitInt(splitPrev, prevVal);
+
+			for (unsigned int j=0;j<digitsCurrent; j++)
+			{
+				if (splitCurrent[j]!= splitPrev[j])
+				{
+					locate(x,y);
+					char_x += (j)*(X_width*lpx);
+					clearScreen(char_x, y ,char_x+(X_width*lpx),y+Y_height*lpy);
+
+					int charAscii = splitCurrent[j]+48;
+					writeChar(charAscii);
+				}
+			}
+		}
+	}
+	if (val==0)
+	{
+		locate(x,y);
+		int charAscii = val + 48;
+		writeChar(charAscii);
+	}
+	displayedNumber = val;
+}
+
+void clearScreen(uint8_t x_start, uint8_t y_start,uint8_t x_end,uint8_t y_end)
+{
+	writeCommand(kSSD1331CommandCLEAR);
+	writeCommand(x_start);
+	writeCommand(y_start);
+	writeCommand(x_end);
+	writeCommand(y_end);
+}
+
+uint16_t countDigits(uint16_t i)
+{
+	uint16_t digits=1;
+	while (i/=10) digits++;
+	return digits;
+}
+
+void splitInt(int *arr, int num)
+{
+	int temp,factor=1;
+	int counter =0;
+	temp=num;
+
+	while(temp)
+	{
+		temp=temp/10;
+		factor = factor*10;
+	}
+
+	while(factor>1){
+		factor = factor/10;
+		arr[counter]= num/factor;
+		num = num % factor;
+		counter++;
+
+	}
+}

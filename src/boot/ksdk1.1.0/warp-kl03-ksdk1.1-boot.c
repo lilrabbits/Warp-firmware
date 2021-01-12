@@ -1225,10 +1225,9 @@ main(void)
 	 *	Notreached
 	 */
 #endif
-
-	devSSD1331init();
+	  devSSD1331init();
                                 
-	   SEGGER_RTT_WriteString(0, "\r\n\tEnabling I2C pins...\n");
+	   	SEGGER_RTT_WriteString(0, "\r\n\tEnabling I2C pins...\n");
 	           enableI2Cpins(menuI2cPullupValue);
 	           OSA_TimeDelay(gWarpMenuPrintDelayMilliseconds);
 
@@ -1244,48 +1243,51 @@ main(void)
 	           );
 
 	           uint8_t new_temp;
-	           uint8_t new_press;
+	 //          uint8_t new_press;
 	           uint8_t new_hum;
-	           uint16_t new_gas_res;
+	          uint16_t new_gas_res;
 	           uint8_t old_temp = 0;
-	           uint8_t old_press = 0;
+	   //        uint8_t old_press = 0;
 	           uint8_t old_hum = 0;
-	           uint16_t old_gas_res = 0;
+	          uint16_t old_gas_res = 0;
+
 
 	           while (1)
 	           {
-	                   enableI2Cpins(menuI2cPullupValue);
-	                   newSensorDataBME680(&new_temp, &new_press, &new_hum, &new_gas_res, menuI2cPullupValue);
-	                   SEGGER_RTT_printf(0, " \n T: %d degC, P: %d hPa, H: %d %%rH, G: %d ohms ", new_temp, new_press, new_hum, new_gas_res);
-	                   OSA_TimeDelay(1000);
+			   enableI2Cpins(menuI2cPullupValue);
+	                   newSensorDataBME680(&new_temp, &new_hum, &new_gas_res, menuI2cPullupValue);
+	  //                 newPressSensorDataBME680(&new_press, menuI2cPullupValue);
+			   SEGGER_RTT_printf(0, " \n T: %d degC, H: %d %%rH", new_temp,  new_hum);
+	             //    printSensorDataBME680(true, menuI2cPullupValue);
+	
+			   OSA_TimeDelay(3000);
+			 
 
-	           if (old_temp != new_temp)
+	          /* if (old_temp != new_temp)
 	           {
 	                   devSSD1331DrawTemp(new_temp);
 	           }
-/*
+
 	           if (old_press != new_press)
 	           {
 	                   devSSD1331DrawPress(new_press);
 	           }
-*/
+
 	           if (old_hum != new_hum)
 	           {
 	                   devSSD1331DrawHum(new_hum);
-				}
+		   }
 
-				if (old_gas_res != new_gas_res)
-				{
-					    devSSD1331DrawIAQ(new_gas_res);
-				}
 				
-		//      condition TBC
+		*/		
+		// condition TBC
 
 		        old_temp = new_temp;
-		        old_press = new_press;
+	//       	old_press = new_press;
 		        old_hum = new_hum;
-		        old_gas_res = new_gas_res;
-		        }
+			old_gas_res = new_gas_res;
+		  
+		   }
 		
         disableI2Cpins();
     
@@ -2595,7 +2597,7 @@ printAllSensors(bool printHeadersAndCalibration, bool hexModeFlag, int menuDelay
 		OSA_TimeDelay(gWarpMenuPrintDelayMilliseconds);
 		#endif
 		#ifdef WARP_BUILD_ENABLE_DEVBME680
-		SEGGER_RTT_WriteString(0, " BME680 Temp, BME680 Press, BME680 Hum, BME680 Gas Res,");
+		SEGGER_RTT_WriteString(0, " BME680 Temp, BME680 Hum, BME680 Gas Res ");
 		OSA_TimeDelay(gWarpMenuPrintDelayMilliseconds);
 		#endif
 		#ifdef WARP_BUILD_ENABLE_DEVBMX055
@@ -2638,6 +2640,9 @@ printAllSensors(bool printHeadersAndCalibration, bool hexModeFlag, int menuDelay
 		#endif
 		#ifdef WARP_BUILD_ENABLE_DEVL3GD20H
 		printSensorDataL3GD20H(hexModeFlag);
+		#endif
+		#ifdef WARP_BUILD_ENABLE_DEVBME680
+		printSensorDataBME680(hexModeFlag);
 		#endif
 		#ifdef WARP_BUILD_ENABLE_DEVBMX055
 		printSensorDataBMX055accel(hexModeFlag);
