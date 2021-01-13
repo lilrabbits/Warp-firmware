@@ -1229,7 +1229,6 @@ main(void)
 	/*
 	 * 	Code for Indoor Air Quality Monitor begins here
 	 */
-	devSSD1331init();
 	enableI2Cpins(menuI2cPullupValue);
 	OSA_TimeDelay(gWarpMenuPrintDelayMilliseconds);
 
@@ -1293,8 +1292,8 @@ main(void)
 
 	total_score = humidity_score + gas_score;
         IAQ_score = (100 - total_score) * 5;
-
-	printData(temp_int, hum_int, IAQ_score);
+	
+	devSSD1331init(temp_int, hum_int, IAQ_score);
 	
 	SEGGER_RTT_printf(0, " \n T: %d degC, H: %d %%rH, G: %d kOhms, IAQ: %d", new_temp,  new_hum, new_gas_res, IAQ_score);
 	OSA_TimeDelay(1000);

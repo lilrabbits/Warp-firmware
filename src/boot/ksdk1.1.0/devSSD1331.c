@@ -255,8 +255,8 @@ static void FontSizeConvert()
     }
 }
 
-int
-devSSD1331init(void)
+void
+devSSD1331init(int new_temp, int new_hum, int new_IAQ_score)
 {
 	/*
 	 *	Override Warp firmware's use of these pins.
@@ -371,13 +371,7 @@ devSSD1331init(void)
 	 * 	with an indication of smiley face or exclamation mark depending on 
 	 * 	the state of the system
 	 */
-	return 0;
-}
-
-void
-printData(int new_temp, int new_hum, int IAQ_score)
-{
-        chr_size = HIGH;
+	chr_size = HIGH;
         FontSizeConvert();
         locate(3,10);
         writeString("T:");
