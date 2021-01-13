@@ -255,8 +255,8 @@ static void FontSizeConvert()
     }
 }
 
-void
-devSSD1331init(int new_temp, int new_hum)
+int
+devSSD1331init(void)
 {
 	/*
 	 *	Override Warp firmware's use of these pins.
@@ -371,38 +371,51 @@ devSSD1331init(int new_temp, int new_hum)
 	 * 	with an indication of smiley face or exclamation mark depending on 
 	 * 	the state of the system
 	 */
-	chr_size = HIGH;
-	FontSizeConvert();
-	locate(3,10);
-	writeString("T:");
-	
-	locate(17,10);
+	return 0;
+}
+
+void
+printData(int new_temp, int new_hum, int IAQ_score)
+{
+        chr_size = HIGH;
+        FontSizeConvert();
+        locate(3,10);
+        writeString("T:");
+
+        locate(17,10);
         uint16_t value1 = 1;
         display(17,10,new_temp,value1);
-	
-	locate(33,10);
+
+        locate(33,10);
         writeString("degC");
 
-	locate(3,40);
+        locate(3,30);
         writeString("H:");
 
-        locate(17,40);
+        locate(17,30);
         uint16_t value2 = 1;
-        display(17,40,new_hum,value2);
+        display(17,30,new_hum,value2);
 
-	locate(33,40);
-        writeString("%RH");
+        locate(33,30);
+        writeString("%rH");
 
-	if((new_temp > 20) & (new_temp < 25) & (new_hum > 40) & (new_hum < 60))
-	{
-	devSSD1331DrawFace();
-	}
+        locate(3,50);
+        writeString("IAQ:");
 
-	else
-	{
-	locate(80,25);
+        locate(17,50);
+        uint16_t value3 = 1;
+        display(17,50,new_IAQ_score,value3);
+
+        if((new_temp > 20) & (new_temp < 25) & (new_hum > 40) & (new_hum < 60))
+        {
+        devSSD1331DrawFace();
+        }
+
+        else
+        {
+        locate(80,25);
         writeString("!");
-	}
+        }
 }
 
 /*

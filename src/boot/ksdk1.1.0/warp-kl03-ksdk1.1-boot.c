@@ -1229,6 +1229,7 @@ main(void)
 	/*
 	 * 	Code for Indoor Air Quality Monitor begins here
 	 */
+	devSSD1331init();
 	enableI2Cpins(menuI2cPullupValue);
 	OSA_TimeDelay(gWarpMenuPrintDelayMilliseconds);
 
@@ -1251,16 +1252,51 @@ main(void)
 	uint16_t old_gas_res = 0;
 	int temp_int;
 	int hum_int;
-
+	int gas_res_int;
+	int IAQ_score;
 	while (1)
 	{
 	enableI2Cpins(menuI2cPullupValue);
 	newSensorDataBME680(&new_temp, &new_hum, &new_gas_res, menuI2cPullupValue);
+
 	temp_int=(int)new_temp;
 	hum_int=(int)new_hum;
-	devSSD1331init(temp_int, hum_int);
+	gas_res_int=(int)new_gas_res;
 	
-	SEGGER_RTT_printf(0, " \n T: %d degC, H: %d %%rH", new_temp,  new_hum);
+	float hum_weighting = 0.25; // so hum effect is 25% of the total air quality score
+        float gas_weighting = 0.75; // so gas effect is 75% of the total air quality score
+
+        int   humidity_score, gas_score, total_score;
+        int   hum_lower_limit = 40;
+        int   hum_upper_limit = 60;
+        float hum_reference = (hum_lower_limit + hum_upper_limit) / 2;
+        int   gas_lower_limit = 0;  // Bad air quality limit
+        int   gas_upper_limit = 50; // Good air quality limit
+
+	if (gas_res_int < gas_lower_limit)
+	gas_score = 0;
+	else if (gas_res_int > gas_upper_limit)
+	gas_score = gas_weighting * 100;
+	else
+	{
+	gas_score = gas_weighting * gas_res_int * 100 / gas_upper_limit;
+	}
+		
+	if (hum_int < hum_lower_limit)
+	humidity_score = hum_weighting / hum_reference * hum_int * 100;
+	else if (hum_int > hum_upper_limit)
+	humidity_score = ((-hum_weighting / (100 - hum_reference) * hum_int) + 0.5) * 100;
+	else
+	{
+	humidity_score = hum_weighting * 100;
+	}
+
+	total_score = humidity_score + gas_score;
+        IAQ_score = (100 - total_score) * 5;
+
+	printData(temp_int, hum_int, IAQ_score);
+	
+	SEGGER_RTT_printf(0, " \n T: %d degC, H: %d %%rH, G: %d kOhms, IAQ: %d", new_temp,  new_hum, new_gas_res, IAQ_score);
 	OSA_TimeDelay(1000);
 
 	old_temp = new_temp;

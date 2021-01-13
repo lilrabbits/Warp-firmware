@@ -59,7 +59,8 @@ uint8_t char_x;
 uint8_t char_y;
 uint16_t displayedNumber = 0;
 
-void devSSD1331init(int new_temp, int new_hum);
+int devSSD1331init(void);
+void printData(int new_temp, int new_hum, int IAQ_score)
 void devSSD1331DrawFace();
 void writeChar(int value);
 void pixel(uint8_t x,uint8_t y,char colour);
