@@ -376,22 +376,22 @@ devSSD1331init(int new_temp, int new_hum)
 	locate(3,10);
 	writeString("T:");
 	
-	locate(33,10);
-        writeString("degC");
-
 	locate(17,10);
         uint16_t value1 = 1;
         display(17,10,new_temp,value1);
-		
+	
+	locate(33,10);
+        writeString("degC");
+
 	locate(3,40);
         writeString("H:");
 
-        locate(33,40);
-        writeString("%RH");
+        locate(17,40);
+        uint16_t value2 = 1;
+        display(17,40,new_hum,value2);
 
-	locate(17,40);
-	uint16_t value2 = 1;
-	display(17,40,new_hum,value2);
+	locate(33,40);
+        writeString("%RH");
 
 	if((new_temp > 20) & (new_temp < 25) & (new_hum > 40) & (new_hum < 60))
 	{

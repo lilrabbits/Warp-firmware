@@ -1261,7 +1261,7 @@ main(void)
 	devSSD1331init(temp_int, hum_int);
 	
 	SEGGER_RTT_printf(0, " \n T: %d degC, H: %d %%rH", new_temp,  new_hum);
-	OSA_TimeDelay(3000);
+	OSA_TimeDelay(1000);
 
 	old_temp = new_temp;
 	old_hum = new_hum;
