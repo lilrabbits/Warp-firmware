@@ -13,9 +13,9 @@ volatile uint8_t	inBuffer[32];
 volatile uint8_t	payloadBytes[32];
 
 /*
- *      Borrowed from https://os.mbed.com/users/star297/code/ssd1331//file/4385fd242db0/ssd1331.cpp/
+ *      Borrowed and adapted from https://os.mbed.com/users/star297/code/ssd1331//file/4385fd242db0/ssd1331.cpp/
  */
-static const char alphabet[0x60][6] = {
+static const char character[0x60][6] = {
     { 0x00,0x00,0x00,0x00,0x00,0x00 } , /*SPC */
     { 0x00,0x00,0x5F,0x00,0x00,0x00 } , /* !  */
     { 0x04,0x03,0x04,0x03,0x00,0x00 } , /* "  */
@@ -347,7 +347,9 @@ devSSD1331init(int new_temp, int new_hum)
 	writeCommand(0x3F);
 	SEGGER_RTT_WriteString(0, "\r\n\tDone with screen clear...\n");
 
-	
+	/*
+	 * 	Fill the screen with green rectangle
+	 */
 /*
 	writeCommand(0x22);    //draw rectangle
 	writeCommand(0x00);    //column start address
@@ -364,6 +366,11 @@ devSSD1331init(int new_temp, int new_hum)
 	
 //	SEGGER_RTT_WriteString(0, "\r\n\tDone with draw rectangle...\n");
 
+	/*
+	 * 	Draw out the screen with temperature and humidity readings, 
+	 * 	with an indication of smiley face or exclamation mark depending on 
+	 * 	the state of the system
+	 */
 	chr_size = HIGH;
 	FontSizeConvert();
 	locate(3,10);
@@ -373,9 +380,8 @@ devSSD1331init(int new_temp, int new_hum)
         writeString("degC");
 
 	locate(17,10);
-//int value3 = 0;
         uint16_t value1 = 1;
-        display(17,10,new_temp, value1);
+        display(17,10,new_temp,value1);
 		
 	locate(3,40);
         writeString("H:");
@@ -384,26 +390,34 @@ devSSD1331init(int new_temp, int new_hum)
         writeString("%RH");
 
 	locate(17,40);
-//	int value3 = 0;
-	uint16_t value4 = 1;
-	display(17,40,new_hum, value4);
+	uint16_t value2 = 1;
+	display(17,40,new_hum,value2);
 
-	if((new_temp > 20) & (new_temp < 25) & (new_hum > 40) & (new_hum < 60)){
-		devSSD1331DrawSmiley();
+	if((new_temp > 20) & (new_temp < 25) & (new_hum > 40) & (new_hum < 60))
+	{
+	devSSD1331DrawFace();
 	}
-	else{
+
+	else
+	{
 	locate(80,25);
         writeString("!");
 	}
 }
 
-void drawRectLine(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, uint8_t C, uint8_t B, uint8_t A, bool rect){
-	// Draw a rectangle or line from (x0, y0) to (x1, y1) of colour (C, B, A)
-
-        if (rect == 1){
-		writeCommand(0x22); // Enter 'draw rectangle' mode
-	} else {
-		writeCommand(0x21); // Enter 'draw line' mode
+/*
+ *	Draw a rectangle or line from (x0, y0) to (x1, y1) of colour (C, B, A)
+ */
+void 	
+drawRectLine(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, uint8_t C, uint8_t B, uint8_t A, bool rect)
+{
+        if (rect == 1)
+	{
+	writeCommand(0x22); 	// Draw Rectangle
+	} 
+	else 
+	{
+	writeCommand(0x21);	// Draw Line
 	}
         writeCommand(x0);      // Start column address
         writeCommand(y0);      // Start row address
@@ -417,7 +431,9 @@ void drawRectLine(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, uint8_t C, uin
         writeCommand(A);       // Set fill colour A
 }
 
-void	devSSD1331DrawSmiley(){
+void	
+devSSD1331DrawFace()
+{
         drawRectLine(0x4B, 0x1D, 0x4C, 0x20, 0xFF, 0xFF, 0xFF, 1);
         drawRectLine(0x53, 0x1D, 0x54, 0x20, 0xFF, 0xFF, 0xFF, 1);
         drawRectLine(0x4E, 0x2A, 0x51, 0x2B, 0xFF, 0xFF, 0xFF, 1);
@@ -430,23 +446,28 @@ void	devSSD1331DrawSmiley(){
         drawRectLine(0x49, 0x26, 0x4A, 0x26, 0xFF, 0xFF, 0xFF, 1);
         drawRectLine(0x55, 0x26, 0x56, 0x26, 0xFF, 0xFF, 0xFF, 1);
 }
-	/*
-	 * https://os.mbed.com/users/star297/code/ssd1331/docs/tip/ssd1331_8h_source.html
-	*/
-void writeChar(int value)
+
+/*
+ *	Borrowed and adapted from https://os.mbed.com/users/star297/code/ssd1331/docs/tip/ssd1331_8h_source.html
+ */
+void 
+writeChar(int value)
 {
 	uint8_t chMode = 0;
-	if(value == '\n') {
-		char_x = 0;
-		char_y = char_y + Y_height;
+	if(value == '\n') 
+	{
+	char_x = 0;
+	char_y = char_y + Y_height;
 	}
 	if ((value < 31) || (value > 127)) return;   // test char range
-	if (char_x + X_width > width) {
-		char_x = 0;
-		char_y = char_y + Y_height;
-		if (char_y >= height - Y_height) {
-			char_y = 0;
-		}
+	if (char_x + X_width > width) 
+	{
+	char_x = 0;
+	char_y = char_y + Y_height;
+	if (char_y >= height - Y_height) 
+	{
+	char_y = 0;
+	}
 	}
 	int i,j,w,k,l,xw;
 	unsigned char Temp=0;
@@ -454,11 +475,15 @@ void writeChar(int value)
 	w = X_width;
 	xw = X_width;
 
-	for(i=0; i<xw; i++) {
-		for ( l=0; l<lpx; l++) {
-			Temp = alphabet[value-32][i];
-			for(j=Y_height-1; j>=0; j--) {
-				for (k=0; k<lpy; k++) {
+	for(i=0; i<xw; i++) 
+	{
+		for ( l=0; l<lpx; l++) 
+		{
+			Temp = character[value-32][i];
+			for(j=Y_height-1; j>=0; j--) 
+			{
+				for (k=0; k<lpy; k++) 
+				{
 					chMode = Temp & 0x80? 1 : 0;
 					pixel(char_x+(i*lpx)+l, char_y+(((j+1)*lpy)-1)-k,chMode);
 				}
@@ -469,16 +494,18 @@ void writeChar(int value)
 	char_x += (w*lpx);
 }
 
-void locate(uint8_t column, uint8_t row)
+void 
+locate(uint8_t column, uint8_t row)
 {
     char_x  = column;
     char_y = row;
 }
 
 /*
- * https://os.mbed.com/users/star297/code/ssd1331/docs/tip/ssd1331_8h_source.html
-*/
-void pixel(uint8_t x,uint8_t y, char colour)
+ *	Borrowed and adapted from https://os.mbed.com/users/star297/code/ssd1331/docs/tip/ssd1331_8h_source.html
+ */
+void 
+pixel(uint8_t x,uint8_t y, char colour)
 {
 	if (colour)
 	{
@@ -500,34 +527,32 @@ void pixel(uint8_t x,uint8_t y, char colour)
 		return;
 }
 
-/*https://electropeak.com/learn/the-beginners-guide-to-display-text-image-animation-on-oled-display-by-arduino/
-*/
-void writeString(const char *pString)
+/*
+ *	Borrowed and adapted from https://electropeak.com/learn/the-beginners-guide-to-display-text-image-animation-on-oled-display-by-arduino/
+ */
+void 
+writeString(const char *pString)
 {
-	// int lpx,lpy;
-	// FontSizeConvert(&lpx, &lpy);
-    while (*pString != '\0') {       
-		int charAscii = (int)*pString;
+    while (*pString != '\0')
+    {       
+	int charAscii = (int)*pString;
         writeChar(charAscii);
         pString++;
     }
 }
 
-void writeInt(int* pString, int size)
+void 
+writeInt(int* pString, int size)
 {
     for (int i=0; i<size;i++)
 	{
-		int charAscii = pString[i]+48;
+	int charAscii = pString[i]+48;
         writeChar(charAscii);
     }
 }
 
-int16_t getCurrentDisplay()
-{
-	return displayedNumber;
-}
-
-void display(int x, int y, uint16_t val, uint16_t prevVal)
+void 
+display(int x, int y, uint16_t val, uint16_t prevVal)
 {
 	if (val != prevVal)
 	{
@@ -571,7 +596,8 @@ void display(int x, int y, uint16_t val, uint16_t prevVal)
 	displayedNumber = val;
 }
 
-void clearScreen(uint8_t x_start, uint8_t y_start,uint8_t x_end,uint8_t y_end)
+void 
+clearScreen(uint8_t x_start, uint8_t y_start,uint8_t x_end,uint8_t y_end)
 {
 	writeCommand(kSSD1331CommandCLEAR);
 	writeCommand(x_start);
@@ -587,7 +613,8 @@ uint16_t countDigits(uint16_t i)
 	return digits;
 }
 
-void splitInt(int *arr, int num)
+void 
+splitInt(int *arr, int num)
 {
 	int temp,factor=1;
 	int counter =0;
@@ -599,7 +626,8 @@ void splitInt(int *arr, int num)
 		factor = factor*10;
 	}
 
-	while(factor>1){
+	while(factor>1)
+	{
 		factor = factor/10;
 		arr[counter]= num/factor;
 		num = num % factor;

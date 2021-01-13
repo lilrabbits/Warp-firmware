@@ -1225,76 +1225,51 @@ main(void)
 	 *	Notreached
 	 */
 #endif
-	           enableI2Cpins(menuI2cPullupValue);
-	           OSA_TimeDelay(gWarpMenuPrintDelayMilliseconds);
-
-	           /*
-	            *      Set humidity, temperature, and pressure to have oversampling x1, in forced mode and heater on
-	            */
-	           configureSensorBME680
-	           (
-	           0b00000001,
-	           0b00100101,
-	           0b00000000,
-	           menuI2cPullupValue
-	           );
-
-	           uint8_t new_temp;
-	 //          uint8_t new_press;
-	           uint8_t new_hum;
-	          uint16_t new_gas_res;
-	           uint8_t old_temp = 0;
-	   //        uint8_t old_press = 0;
-	           uint8_t old_hum = 0;
-	          uint16_t old_gas_res = 0;
-			int temp_int;
-			int hum_int;
-
-	           while (1)
-	           
-		   {
-			   enableI2Cpins(menuI2cPullupValue);
-	                   newSensorDataBME680(&new_temp, &new_hum, &new_gas_res, menuI2cPullupValue);
-	  		   temp_int=(int)new_temp;
-                           hum_int=(int)new_hum;
-			   devSSD1331init(temp_int, hum_int);
-	  //               newPressSensorDataBME680(&new_press, menuI2cPullupValue);
-			   SEGGER_RTT_printf(0, " \n T: %d degC, H: %d %%rH", new_temp,  new_hum);
-	             //    printSensorDataBME680(true, menuI2cPullupValue);
 	
-			   OSA_TimeDelay(3000);
-			 
+	/*
+	 * 	Code for Indoor Air Quality Monitor begins here
+	 */
+	enableI2Cpins(menuI2cPullupValue);
+	OSA_TimeDelay(gWarpMenuPrintDelayMilliseconds);
 
-	          /* if (old_temp != new_temp)
-	           {
-	                   devSSD1331DrawTemp(new_temp);
-	           }
+       	/*
+	 * 	Set humidity, temperature, and pressure to have oversampling x1, in forced mode and heater on
+	 */          
+	configureSensorBME680
+	(
+	0b00000001,
+	0b00100101,
+	0b00000000,
+	menuI2cPullupValue
+	);
 
-	           if (old_press != new_press)
-	           {
-	                   devSSD1331DrawPress(new_press);
-	           }
+	uint8_t new_temp;
+	uint8_t new_hum;
+	uint16_t new_gas_res;
+	uint8_t old_temp = 0;
+	uint8_t old_hum = 0;
+	uint16_t old_gas_res = 0;
+	int temp_int;
+	int hum_int;
 
-	           if (old_hum != new_hum)
-	           {
-	                   devSSD1331DrawHum(new_hum);
-		   }
+	while (1)
+	{
+	enableI2Cpins(menuI2cPullupValue);
+	newSensorDataBME680(&new_temp, &new_hum, &new_gas_res, menuI2cPullupValue);
+	temp_int=(int)new_temp;
+	hum_int=(int)new_hum;
+	devSSD1331init(temp_int, hum_int);
+	
+	SEGGER_RTT_printf(0, " \n T: %d degC, H: %d %%rH", new_temp,  new_hum);
+	OSA_TimeDelay(3000);
 
-				
-		*/		
-		// condition TBC
+	old_temp = new_temp;
+	old_hum = new_hum;
+	old_gas_res = new_gas_res;
+	}
 
-		        old_temp = new_temp;
-	//       	old_press = new_press;
-		        old_hum = new_hum;
-			old_gas_res = new_gas_res;
-		  
-		   }
-		
-        disableI2Cpins();
-    
-
-
+	disableI2Cpins();
+	
 	while (1)
 	{
 		/*
@@ -2643,9 +2618,9 @@ printAllSensors(bool printHeadersAndCalibration, bool hexModeFlag, int menuDelay
 		#ifdef WARP_BUILD_ENABLE_DEVL3GD20H
 		printSensorDataL3GD20H(hexModeFlag);
 		#endif
-		#ifdef WARP_BUILD_ENABLE_DEVBME680
-		printSensorDataBME680(hexModeFlag);
-		#endif
+		//#ifdef WARP_BUILD_ENABLE_DEVBME680
+		//printSensorDataBME680(hexModeFlag);
+		//#endif
 		#ifdef WARP_BUILD_ENABLE_DEVBMX055
 		printSensorDataBMX055accel(hexModeFlag);
 		printSensorDataBMX055mag(hexModeFlag);

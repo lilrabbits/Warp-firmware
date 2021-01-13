@@ -52,7 +52,7 @@ typedef enum
 
 static uint8_t lpx;
 static uint8_t lpy;
-// static void FontSizeConvert();
+static void FontSizeConvert();
 
 uint8_t chr_size;
 uint8_t char_x;
@@ -60,7 +60,7 @@ uint8_t char_y;
 uint16_t displayedNumber = 0;
 
 void devSSD1331init(int new_temp, int new_hum);
-void	devSSD1331DrawSmiley();
+void devSSD1331DrawFace();
 void writeChar(int value);
 void pixel(uint8_t x,uint8_t y,char colour);
 void locate(uint8_t column, uint8_t row);
@@ -69,6 +69,5 @@ void writeInt(int* pString, int size);
 void clearScreen(uint8_t x_start, uint8_t y_start,uint8_t x_end,uint8_t y_end);
 
 void display(int x, int y, uint16_t val, uint16_t prevVal);
-int16_t getCurrentDisplay();
 uint16_t countDigits(uint16_t i);
 void splitInt(int *arr, int num);
