@@ -19,9 +19,6 @@ And a warning sign otherwise.
 
 IAQ index in this case is calculated based on humidity and gas resistance readings obtained from BME680 instead of using BSEC software to obtain IAQ index as one would want to directly output the IAQ index readings onto OLED display. Humidity contributes 25% to the final IAQ score and gas resistance contributes 75%.
 
-An image of the final board layout is as shown below:
-![Final Board Layout](https://github.com/lilrabbits/Warp-firmware/blob/master/layout.JPG)
-
 ## Repository Layout
 The directory `src/boot/ksdk1.1.0` in this repository includes the key files that were modified for the project, namely as follows:
 ```
