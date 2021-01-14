@@ -2,6 +2,10 @@
 ### Rae Zhao (rz295)
 ### Peterhouse
 
+
+## Link to show the diffs from original Warp-firmware repository
+[git diff](https://github.com/physical-computation/Warp-firmware/compare/master...lilrabbits:master)
+
 ## Project Overview
 The project aims to implement an Indoor Air Quality monitor on the FRDMKL03 development board using Warp firmware. The IAQ monitor is able to display temperature in degree Celsius, humidity in %rH, and IAQ index (between a range from 0-500) on SSD1331 OLED display with readings obtained from the BME680 environmental sensor. In addition, the system is able to determine the quality of air based on threshold limits set for temperature, humidity, IAQ index and indicate good air quality with a smiley face or a warning sign otherwise.
 
