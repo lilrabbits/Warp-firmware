@@ -367,7 +367,7 @@ devSSD1331init(int new_temp, int new_hum, int new_IAQ_score)
 //	SEGGER_RTT_WriteString(0, "\r\n\tDone with draw rectangle...\n");
 
 	/*
-	 * 	Draw out the screen with temperature and humidity readings, 
+	 * 	Draw out the screen with temperature, humidity and IAQ readings, 
 	 * 	with an indication of smiley face or exclamation mark depending on 
 	 * 	the state of the system
 	 */
@@ -396,11 +396,11 @@ devSSD1331init(int new_temp, int new_hum, int new_IAQ_score)
         locate(3,50);
         writeString("IAQ:");
 
-        locate(17,50);
+        locate(30,50);
         uint16_t value3 = 1;
         display(17,50,new_IAQ_score,value3);
 
-        if((new_temp > 20) & (new_temp < 25) & (new_hum > 40) & (new_hum < 60))
+        if((new_temp > 20) & (new_temp < 25) & (new_hum > 40) & (new_hum < 60) & (IAQ_score <50))
         {
         devSSD1331DrawFace();
         }

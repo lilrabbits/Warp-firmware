@@ -1257,7 +1257,10 @@ main(void)
 	{
 	enableI2Cpins(menuI2cPullupValue);
 	newSensorDataBME680(&new_temp, &new_hum, &new_gas_res, menuI2cPullupValue);
-
+	
+	/*
+	 *	Calculate IAQ index based on humidity and gas resistance data
+	 */
 	temp_int=(int)new_temp;
 	hum_int=(int)new_hum;
 	gas_res_int=(int)new_gas_res;

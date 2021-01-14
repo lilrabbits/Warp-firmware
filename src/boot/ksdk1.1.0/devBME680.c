@@ -382,11 +382,6 @@ newSensorDataBME680(uint8_t* new_temp, uint8_t* new_hum, uint16_t* new_gas_res, 
         var3_comp = (((int64_t) lookupTable2[gas_res_range] * (int64_t) var1_comp) >> 9);
         gas_res_comp = (uint32_t) ((var3_comp + ((int64_t) var2_comp >> 1)) / (int64_t) var2_comp);
 
-//	if (gas_res_comp > 50000)
-//	{
-//		gas_res_comp = 50000;
-//	}
-
         if ((triggerStatus != kWarpStatusOK) || (i2cReadStatusMSB != kWarpStatusOK) || (i2cReadStatusLSB != kWarpStatusOK))
         {
                 *new_gas_res = 0;
