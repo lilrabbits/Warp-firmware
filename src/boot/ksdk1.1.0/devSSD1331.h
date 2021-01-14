@@ -60,7 +60,8 @@ uint8_t char_x;
 uint8_t char_y;
 uint16_t displayedNumber = 0;
 
-void devSSD1331DrawFace();
+void devSSD1331DrawGreenFace();
+void devSSD1331DrawYellowFace();
 void writeChar(int value);
 void pixel(uint8_t x,uint8_t y,char colour);
 void locate(uint8_t column, uint8_t row);
